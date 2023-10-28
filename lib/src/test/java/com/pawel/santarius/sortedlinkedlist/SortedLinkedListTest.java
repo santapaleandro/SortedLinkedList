@@ -2,19 +2,59 @@ package com.pawel.santarius.sortedlinkedlist;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 import static org.junit.Assert.*;
 
 public class SortedLinkedListTest {
 
     private SortedLinkedList<Integer> sortedLinkedList;
+    private SortedLinkedList<Integer> sortedLinkedList2;
 
     @Before public void init(){
         sortedLinkedList = new SortedLinkedList<>();
         sortedLinkedList.add(2);
+        sortedLinkedList2 = new SortedLinkedList<>();
+        sortedLinkedList2.add(2);
     }
 
-    @Test public void addToEmpty() {
+    @Test public void equals(){
+        assertEquals(sortedLinkedList, sortedLinkedList2);
+    }
+
+    @Test public void add() {
         assertTrue(sortedLinkedList.size != 0);
+    }
+
+    @Test public void addArrayList(){
+        ArrayList<Integer> arr = new ArrayList<>();
+        arr.add(3);
+        arr.add(4);
+        arr.add(5);
+        sortedLinkedList.add(arr);
+        assertEquals(sortedLinkedList.size,4);
+    }
+
+    @Test public void addLinkedList(){
+        LinkedList<Integer> arr = new LinkedList<>();
+        arr.add(4);
+        arr.add(3);
+        arr.add(5);
+        sortedLinkedList.add(arr);
+        assertEquals(sortedLinkedList.size,4);
+        assertEquals(sortedLinkedList.indexOf(3),1);
+    }
+
+    @Test public void addSortedLinkedList(){
+        SortedLinkedList<Integer> arr = new SortedLinkedList<>();
+        arr.add(4);
+        arr.add(3);
+        arr.add(5);
+        sortedLinkedList.add(arr);
+        assertEquals(sortedLinkedList.size,4);
+        assertEquals(sortedLinkedList.indexOf(3),1);
     }
 
     @Test public void checkSize(){
@@ -51,7 +91,7 @@ public class SortedLinkedListTest {
     }
 
     @Test public void removeElement(){
-        sortedLinkedList.removeElement(new Element<>(2));
+        sortedLinkedList.remove(new Element<>(2));
         assertEquals(0, sortedLinkedList.size);
     }
 
@@ -88,5 +128,15 @@ public class SortedLinkedListTest {
 
     @Test public void contains(){
         assertTrue(sortedLinkedList.contains(2));
+        sortedLinkedList.add(3);
+        assertTrue(sortedLinkedList.contains(3));
+    }
+
+    @Test public void toArray(){
+        ArrayList<Integer> arrayList = new ArrayList<>();
+        arrayList.add(1);
+        arrayList.add(2);
+        sortedLinkedList.add(1);
+        assertEquals(sortedLinkedList.toArray(),arrayList);
     }
 }

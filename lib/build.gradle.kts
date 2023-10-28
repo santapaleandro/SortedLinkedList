@@ -17,6 +17,7 @@ repositories {
 }
 
 dependencies {
+    implementation("org.jetbrains:annotations:24.0.0")
     // Use JUnit test framework.
     testImplementation("junit:junit:4.13.2")
 
