@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import static org.junit.Assert.*;
@@ -118,6 +119,11 @@ public class SortedLinkedListTest {
         assertEquals(sortedLinkedList.indexOf(2), 1);
     }
 
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testGetIndexGreaterThanSize() {
+        sortedLinkedList.get(3);
+    }
+
     @Test public void lastIndexOf(){
         assertEquals(sortedLinkedList.lastIndexOf(2),0);
         sortedLinkedList.add(1);
@@ -139,4 +145,29 @@ public class SortedLinkedListTest {
         sortedLinkedList.add(1);
         assertEquals(sortedLinkedList.toArray(),arrayList);
     }
+
+    @Test public void Iterator(){
+        sortedLinkedList.add(5);
+        sortedLinkedList.add(3);
+        Iterator<Integer> iterator = sortedLinkedList.iterator();
+        assertEquals(Integer.valueOf(2), iterator.next());
+        assertTrue(iterator.hasNext());
+        assertEquals(Integer.valueOf(3), iterator.next());
+        assertTrue(iterator.hasNext());
+        assertEquals(Integer.valueOf(5), iterator.next());
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test public void equalsFalse(){
+        sortedLinkedList2.add(10);
+        assertNotEquals(sortedLinkedList, sortedLinkedList2);
+    }
+
+    @Test public void forEachAddThree(){
+        sortedLinkedList.add(10);
+        sortedLinkedList.add(5);
+        sortedLinkedList.stream();
+    }
+
+
 }

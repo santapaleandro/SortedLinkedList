@@ -5,12 +5,42 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.StreamSupport;
 
+/**
+ * SortedLinkedList is a custom implementation of a sorted linked list.
+ * This data structure automatically maintains its elements in a sorted order
+ * according to their natural ordering or by a Comparator provided at list creation time.
+ * This implementation permits all elements, including null.
+ *
+ * <p>This class provides methods to add, remove, and query elements. It also
+ * supports various utility methods such as getting the size, checking if an element exists,
+ * and converting the list to an array.
+ *
+ * <p>Note that this implementation is not synchronized. If multiple threads access a
+ * sorted linked list concurrently and at least one of the threads modifies the list
+ * structurally, it must be synchronized externally.
+ *
+ * <p>The iterators provided by this class are fail-fast: if the list is structurally
+ * modified at any time after the iterator is created, in any way except through the
+ * iterator's own remove method, the iterator will throw a {@link ConcurrentModificationException}.
+ *
+ * @param <T> the type of elements held in this collection, which must be Comparable
+ * @author Pawel Santarius
+ * @version 1.0
+ * @since 2023-10-28
+ */
 public class SortedLinkedList <T extends Comparable<T>> implements Serializable, Iterable<T> {
     transient Element<T> head;
     transient Element<T> last;
     transient int size = 0;
 
+    /**
+     * Adds a new element to the list. The element is inserted into the correct position
+     * to maintain the sorted order.
+     *
+     * @param value the value to be added
+     */
     void add(T value) {
         Element<T> newElement = new Element<>(value);
         if (head == null){
@@ -40,6 +70,12 @@ public class SortedLinkedList <T extends Comparable<T>> implements Serializable,
         size++;
     }
 
+    /**
+     * Adds all elements from an ArrayList to the list. Each element is inserted
+     * into the correct position to maintain the sorted order.
+     *
+     * @param array the ArrayList containing elements to be added
+     */
     void add(ArrayList<T> array){
         if (array != null){
             for (T t : array) {
@@ -48,6 +84,12 @@ public class SortedLinkedList <T extends Comparable<T>> implements Serializable,
         }
     }
 
+    /**
+     * Adds all elements from a LinkedList to the list. Each element is inserted
+     * into the correct position to maintain the sorted order.
+     *
+     * @param linkedList the LinkedList containing elements to be added
+     */
     void add(LinkedList<T> linkedList){
         if (linkedList != null){
             for (T t : linkedList) {
@@ -56,6 +98,12 @@ public class SortedLinkedList <T extends Comparable<T>> implements Serializable,
         }
     }
 
+    /**
+     * Adds all elements from another SortedLinkedList to this list. Each element is
+     * inserted into the correct position to maintain the sorted order.
+     *
+     * @param list the SortedLinkedList containing elements to be added
+     */
     void add(SortedLinkedList<T> list){
         if (list != null){
             for (int i = 0; i < list.size; i++){
@@ -64,6 +112,14 @@ public class SortedLinkedList <T extends Comparable<T>> implements Serializable,
         }
     }
 
+    /**
+     * Removes the specified element from the doubly linked list.
+     * Adjusts head or last pointers if the removed element is at either end of the list.
+     * If the element is in the middle, it connects the previous and next elements directly.
+     * Assumes the list and the element are not null.
+     *
+     * @param e the element to be removed
+     */
     void remove(Element<T> e){
         size--;
         if (size == 0){
@@ -84,12 +140,29 @@ public class SortedLinkedList <T extends Comparable<T>> implements Serializable,
         }
     }
 
+    /**
+     * Removes the element at the specified position in this list.
+     * This method first checks if the index is within the bounds of the list,
+     * then retrieves the element at that index, and finally removes the element.
+     *
+     * @param index the index of the element to be removed
+     * @throws IndexOutOfBoundsException if the index is out of range
+     *         (index < 0 || index >= size())
+     */
     public void remove(int index){
         checkBoundsExclusive(index);
         Element<T> e = getElement(index);
         remove(e);
     }
 
+    /**
+     * Removes the first element from the list.
+     * If the list is empty, this method throws a NoSuchElementException.
+     * Adjusts the head of the list to the next element, if available, and decrements the size.
+     * If the list only contains one element, it removes it and sets both head and last to null.
+     *
+     * @throws NoSuchElementException if the list is empty
+     */
     void removeFirst() {
         if (size == 0){
             throw new NoSuchElementException();
@@ -103,6 +176,14 @@ public class SortedLinkedList <T extends Comparable<T>> implements Serializable,
         size--;
     }
 
+    /**
+     * Removes the last element from the list.
+     * If the list is empty, this method throws a NoSuchElementException.
+     * Adjusts the last of the list to its previous element, if available, and decrements the size.
+     * If the list only contains one element, it removes it and sets both head and last to null.
+     *
+     * @throws NoSuchElementException if the list is empty
+     */
     void removeLast() {
         if (size == 0) {
             throw new NoSuchElementException();
@@ -116,6 +197,11 @@ public class SortedLinkedList <T extends Comparable<T>> implements Serializable,
         size--;
     }
 
+    /**
+     * Clears the list, removing all elements.
+     * Sets both head and last pointers to null and resets the size to 0.
+     * If the list is already empty, this method does nothing.
+     */
     void clear(){
         if (size > 0){
             head = null;
@@ -124,6 +210,14 @@ public class SortedLinkedList <T extends Comparable<T>> implements Serializable,
         }
     }
 
+    /**
+     * Retrieves the element at the specified position in the list.
+     * This method optimizes retrieval by iterating from either the head or the last element,
+     * depending on whether the index is in the first or second half of the list.
+     *
+     * @param n the index of the element to retrieve
+     * @return the element at the specified position in this list
+     */
     private Element<T> getElement(int n) {
        Element<T> e;
        if (n < size / 2) {
@@ -138,6 +232,14 @@ public class SortedLinkedList <T extends Comparable<T>> implements Serializable,
        return e;
     }
 
+    /**
+     * Checks if the given index is within the valid range for existing elements in the list.
+     * The valid range is exclusive, meaning the index can be from 0 to size - 1.
+     * Throws an IndexOutOfBoundsException if the index is out of the valid range.
+     *
+     * @param index the index to check
+     * @throws IndexOutOfBoundsException if index is negative or not less than the current size of the list
+     */
     private void checkBoundsExclusive(int index){
         if (index < 0 ){
             throw new IndexOutOfBoundsException("Index: " + index + " can not be negative number.");
@@ -147,16 +249,38 @@ public class SortedLinkedList <T extends Comparable<T>> implements Serializable,
         }
     }
 
+    /**
+     * Retrieves the element data at the specified position in the list.
+     * This method first checks if the index is within the bounds of the list
+     * and then returns the data of the element at that index.
+     *
+     * @param index the index of the element whose data is to be returned
+     * @return the data of the element at the specified position
+     * @throws IndexOutOfBoundsException if the index is out of range
+     *         (index < 0 || index >= size)
+     */
     public T get(int index){
         checkBoundsExclusive(index);
         return getElement(index).data;
     }
 
+    /**
+     * Returns the index of the first occurrence of the specified element in this list,
+     * or -1 if this list does not contain the element. More formally, returns
+     * the lowest index {@code i} such that {@code value.equals(get(i))},
+     * or -1 if there is no such index.
+     *
+     * @param value the value to search for
+     * @return the index of the first occurrence of the specified element in this list,
+     *         or -1 if this list does not contain the element. If the specified value
+     *         is null, then the behavior of this method is unspecified and may vary
+     *         depending on the implementation.
+     */
     public int indexOf(T value){
         Element<T> e = head;
         int index = 0;
         while (e != null){
-            if (e.data == value){
+            if (e.data.equals(value)){
                 return index;
             }
             index++;
@@ -165,12 +289,24 @@ public class SortedLinkedList <T extends Comparable<T>> implements Serializable,
         return -1;
     }
 
+    /**
+     * Returns the index of the last occurrence of the specified element in this list,
+     * or -1 if this list does not contain the element. More formally, returns
+     * the highest index {@code i} such that {@code value.equals(get(i))},
+     * or -1 if there is no such index.
+     *
+     * @param value the value to search for
+     * @return the index of the last occurrence of the specified element in this list,
+     *         or -1 if this list does not contain the element. If the specified value
+     *         is null, then the behavior of this method is unspecified and may vary
+     *         depending on the implementation.
+     */
     public int lastIndexOf(T value){
         Element<T> e = last;
         int index = size;
         while (e != null){
             index--;
-            if (e.data == value) {
+            if (e.data.equals(value)) {
                 return index;
             }
             e = e.previous;
@@ -178,6 +314,15 @@ public class SortedLinkedList <T extends Comparable<T>> implements Serializable,
         return -1;
     }
 
+    /**
+     * Checks if the linked list contains a specified value.
+     *
+     * <p>Iterates through the list, comparing each element's data with the given value.
+     * The comparison is equality-based, typically using the {@code equals} method.</p>
+     *
+     * @param value The value to search for in the list.
+     * @return {@code true} if the value is found, {@code false} otherwise.
+     */
     public boolean contains(T value){
         Element<T> e = head;
         while (e != null){
@@ -189,6 +334,15 @@ public class SortedLinkedList <T extends Comparable<T>> implements Serializable,
         return false;
     }
 
+    /**
+     * Converts the sorted linked list to an {@link ArrayList}.
+     *
+     * <p>This method copies the elements of the linked list into an ArrayList,
+     * preserving the order of elements. The generated ArrayList is a new copy,
+     * independent of the original list.</p>
+     *
+     * @return an ArrayList containing all elements of the linked list.
+     */
     public ArrayList<T> toArray(){
         ArrayList<T> array = new ArrayList<>(size);
         Element<T> e = head;
@@ -279,28 +433,24 @@ public class SortedLinkedList <T extends Comparable<T>> implements Serializable,
     }
 
     /**
-     * Performs the given action for each element of the {@code Iterable}
-     * until all elements have been processed or the action throws an
-     * exception.  Actions are performed in the order of iteration, if that
-     * order is specified.  Exceptions thrown by the action are relayed to the
-     * caller.
-     * <p>
-     * The behavior of this method is unspecified if the action performs
-     * side effects that modify the underlying source of elements, unless an
-     * overriding class has specified a concurrent modification policy.
+     * Performs the given action for each element of the linked list.
      *
-     * @param action The action to be performed for each element
-     * @throws NullPointerException if the specified action is null
-     * @implSpec <p>The default implementation behaves as if:
-     * <pre>{@code
-     *     for (T t : this)
-     *         action.accept(t);
-     * }</pre>
-     * @since 1.8
+     * <p>This method traverses the list from head to tail, applying the provided
+     * {@code Consumer} action to each element's data. It's useful for iterating over
+     * the list with a lambda expression or method reference.</p>
+     *
+     * <p>This implementation overrides {@link Iterable#forEach(Consumer)} and provides
+     * a way to access list elements in a functional style.</p>
+     *
+     * @param action The action to be performed for each element, which must not be null.
+     * @throws NullPointerException if the specified action is null.
      */
     @Override
-    public void forEach(Consumer action) {
-        Iterable.super.forEach(action);
+    public void forEach(Consumer<? super T> action) {
+        Objects.requireNonNull(action);
+        for (Element<T> current = head; current != null; current = current.next) {
+            action.accept(current.data);
+        }
     }
 
     /**
@@ -321,7 +471,11 @@ public class SortedLinkedList <T extends Comparable<T>> implements Serializable,
      * @since 1.8
      */
     @Override
-    public Spliterator spliterator() {
+    public Spliterator<T> spliterator() {
         return Iterable.super.spliterator();
+    }
+
+    public void stream() {
+        StreamSupport.stream(this.spliterator(), false);
     }
 }
