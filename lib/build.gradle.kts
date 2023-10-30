@@ -8,7 +8,13 @@
 plugins {
     // Apply the java-library plugin for API and implementation separation.
     `java-library`
-    id("org.sonarqube") version "4.4.1.3373"
+    id("com.diffplug.spotless") version "6.7.2"
+}
+
+spotless {
+    java {
+        googleJavaFormat()
+    }
 }
 
 repositories {
@@ -32,5 +38,11 @@ dependencies {
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+tasks.named<Test>("test"){
+    testLogging{
+        events("passed","failed","skipped")
     }
 }
